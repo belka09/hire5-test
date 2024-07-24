@@ -3,25 +3,25 @@
         class="bg-red-500 text-white p-2 rounded mb-4 inline-block">Go Back</a>
     <form [formGroup]="productForm"
         (ngSubmit)="onSubmit()">
-        <div>
-            <label for="name">Name:</label>
+        <div class="mb-2">
+            <label for="name">Name: *</label>
             <input id="name"
                 formControlName="name"
                 class="border p-2 rounded w-full" />
         </div>
-        <div>
-            <label for="description">Description:</label>
+        <div class="mb-2">
+            <label for="description">Description: *</label>
             <input id="description"
                 formControlName="description"
                 class="border p-2 rounded w-full" />
         </div>
-        <div>
-            <label for="sku">SKU:</label>
+        <div class="mb-2">
+            <label for="sku">SKU: *</label>
             <input id="sku"
                 formControlName="sku"
                 class="border p-2 rounded w-full" />
         </div>
-        <div>
+        <div class="mb-2">
             <label for="cost">Cost:</label>
             <input id="cost"
                 formControlName="cost"
@@ -29,7 +29,7 @@
                 class="border p-2 rounded w-full" />
         </div>
         <div formGroupName="profile">
-            <div>
+            <div class="mb-2">
                 <label for="type">Type:</label>
                 <select id="type"
                     formControlName="type"
@@ -40,14 +40,14 @@
                     <option value="part">Part</option>
                 </select>
             </div>
-            <div>
+            <div class="mb-2">
                 <label for="available">Available:</label>
                 <input id="available"
                     type="checkbox"
                     formControlName="available"
                     class="border p-2 rounded" />
             </div>
-            <div>
+            <div class="mb-2">
                 <label for="backlog">Backlog:</label>
                 <input id="backlog"
                     formControlName="backlog"
@@ -58,6 +58,7 @@
         <app-custom-property-editor [properties]="productForm.get('customProperties')?.value"
             (propertiesChange)="onCustomPropertiesChange($event)"></app-custom-property-editor>
         <button type="submit"
-            class="bg-blue-500 text-white p-2 rounded mt-2">Save Product</button>
+            [disabled]="productForm.invalid"
+            class="bg-blue-500 text-white font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed">Save Product</button>
     </form>
 </div>
