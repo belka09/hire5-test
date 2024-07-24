@@ -1,0 +1,18 @@
+<div [formGroup]="customPropertiesForm">
+    <div formArrayName="properties">
+        @for(property of propertiesArray.controls; track property; let i = $index) {
+        <div [formGroupName]="i">
+            <input formControlName="key"
+                placeholder="Key"
+                (change)="onPropertyChange()" />
+            <input formControlName="value"
+                placeholder="Value"
+                (change)="onPropertyChange()" />
+            <button type="button"
+                (click)="removeProperty(i)">Remove</button>
+        </div>
+        }
+    </div>
+    <button type="button"
+        (click)="addProperty()">Add Property</button>
+</div>

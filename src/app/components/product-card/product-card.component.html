@@ -1,0 +1,63 @@
+<div class="container mx-auto p-4">
+    <a routerLink="/products"
+        class="bg-red-500 text-white p-2 rounded mb-4 inline-block">Go Back</a>
+    <form [formGroup]="productForm"
+        (ngSubmit)="onSubmit()">
+        <div>
+            <label for="name">Name:</label>
+            <input id="name"
+                formControlName="name"
+                class="border p-2 rounded w-full" />
+        </div>
+        <div>
+            <label for="description">Description:</label>
+            <input id="description"
+                formControlName="description"
+                class="border p-2 rounded w-full" />
+        </div>
+        <div>
+            <label for="sku">SKU:</label>
+            <input id="sku"
+                formControlName="sku"
+                class="border p-2 rounded w-full" />
+        </div>
+        <div>
+            <label for="cost">Cost:</label>
+            <input id="cost"
+                formControlName="cost"
+                type="number"
+                class="border p-2 rounded w-full" />
+        </div>
+        <div formGroupName="profile">
+            <div>
+                <label for="type">Type:</label>
+                <select id="type"
+                    formControlName="type"
+                    class="border p-2 rounded w-full">
+                    <option value="furniture">Furniture</option>
+                    <option value="equipment">Equipment</option>
+                    <option value="stationary">Stationary</option>
+                    <option value="part">Part</option>
+                </select>
+            </div>
+            <div>
+                <label for="available">Available:</label>
+                <input id="available"
+                    type="checkbox"
+                    formControlName="available"
+                    class="border p-2 rounded" />
+            </div>
+            <div>
+                <label for="backlog">Backlog:</label>
+                <input id="backlog"
+                    formControlName="backlog"
+                    type="number"
+                    class="border p-2 rounded w-full" />
+            </div>
+        </div>
+        <app-custom-property-editor [properties]="productForm.get('customProperties')?.value"
+            (propertiesChange)="onCustomPropertiesChange($event)"></app-custom-property-editor>
+        <button type="submit"
+            class="bg-blue-500 text-white p-2 rounded mt-2">Save Product</button>
+    </form>
+</div>
