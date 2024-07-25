@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import {
@@ -7,6 +7,8 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { ApiService } from '../../services/api.service';
 import { CustomPropertyEditorComponent } from '../custom-property/custom-property.component';
@@ -23,7 +25,9 @@ import { CustomPropertyEditorComponent } from '../custom-property/custom-propert
   templateUrl: './product-card.component.html',
   styleUrls: ['./product-card.component.scss'],
 })
-export class ProductCardComponent implements OnInit {
+export class ProductCardComponent implements OnInit, OnDestroy {
+  private readonly destroy$ = new Subject<void>();
+
   productForm!: FormGroup;
   isEditMode = false;
   initialData: any;
@@ -36,27 +40,37 @@ export class ProductCardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.activatedRoute.params.subscribe((params) => {
-      const productId = params['id'];
-      if (productId) {
-        this.isEditMode = true;
-        const activeItem = this.apiService
-          .products()
-          .find((item) => item.id === +productId);
-        this.initialData = activeItem;
-        this.initializeForm(activeItem);
-      } else {
-        this.isEditMode = false;
-        this.initializeForm();
-      }
-
-      this.productForm.valueChanges.subscribe(() => {
-        this.onProfileChange();
+    this.activatedRoute.params
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((params) => {
+        const productId = params['id'];
+        if (productId) {
+          this.apiService
+            .getProducts()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(() => {
+              this.isEditMode = true;
+              const activeItem = this.apiService
+                .products()
+                .find((item) => item.id === +productId);
+              this.initialData = activeItem;
+              this.initializeForm(activeItem);
+            });
+        } else {
+          this.isEditMode = false;
+          this.initializeForm();
+        }
       });
-    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   initializeForm(activeItem?: any): void {
+    const profile = activeItem?.profile ? { ...activeItem.profile } : {};
+
     this.productForm = this.fb.group({
       name: [activeItem?.name || '', Validators.required],
       description: [activeItem?.description || '', Validators.required],
@@ -70,22 +84,28 @@ export class ProductCardComponent implements OnInit {
         ],
       ],
       profile: this.fb.group({
-        type: [activeItem?.profile?.type || 'furniture'],
-        available: [activeItem?.profile?.available ?? true],
-        backlog: [activeItem?.profile?.backlog || ''],
+        type: [profile.type || 'furniture'],
+        available: [profile.available ?? true],
+        backlog: [profile.backlog || ''],
       }),
     });
 
-    if (activeItem?.profile) {
-      this.addCustomProperties(activeItem.profile);
-    }
+    this.productForm.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.onProfileChange();
+      });
   }
 
   createProduct(): void {
     const { id, ...product } = this.productForm.value;
-    this.apiService.createProduct(product).subscribe((newProduct) => {
-      this.router.navigate(['/products']);
-    });
+    product.profile = { ...product.profile };
+    this.apiService
+      .createProduct(product)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.router.navigate(['/products']);
+      });
   }
 
   updateProduct(): void {
@@ -94,9 +114,13 @@ export class ProductCardComponent implements OnInit {
       this.initialData,
       this.productForm.value
     );
-    this.apiService.updateProduct(productId, changes).subscribe(() => {
-      this.router.navigate(['/products']);
-    });
+    changes.profile = { ...changes.profile };
+    this.apiService
+      .updateProduct(productId, changes)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.router.navigate(['/products']);
+      });
   }
 
   getChangedFields(initialData: any, currentData: any): any {
@@ -125,23 +149,6 @@ export class ProductCardComponent implements OnInit {
   onProfileChange(): void {
     const profile = this.productForm.get('profile')!.value;
     this.productForm.patchValue({ profile }, { emitEvent: false });
-  }
-
-  onCustomPropertiesChange(customProperties: any): void {
-    const profile = {
-      ...this.productForm.get('profile')!.value,
-      ...customProperties,
-    };
-    this.productForm.patchValue({ profile });
-  }
-
-  private addCustomProperties(profile: any): void {
-    const profileGroup = this.productForm.get('profile') as FormGroup;
-    for (const key of Object.keys(profile)) {
-      if (!profileGroup.get(key)) {
-        profileGroup.addControl(key, this.fb.control(profile[key]));
-      }
-    }
   }
 
   onSubmit(): void {

@@ -21,36 +21,26 @@ export class ApiService {
     private authService: AuthService
   ) {}
 
-  public getProducts(): void {
+  public getProducts(): Observable<Product[]> {
     this.loaderService.showLoader();
-    this.http
-      .get<Product[]>(environment.apiUrl, {
-        headers: { Authorization: `Bearer ${this.authService.token()}` },
-      })
-      .pipe(
-        delay(1000),
-        finalize(() => this.loaderService.hideLoader()),
-        catchError(this.handleError.bind(this))
-      )
-      .subscribe((items) => {
-        this.products.set(items);
-      });
+    return this.http.get<Product[]>(environment.apiUrl).pipe(
+      delay(500),
+      tap((items) => this.products.set(items)),
+      finalize(() => this.loaderService.hideLoader()),
+      catchError(this.handleError.bind(this))
+    );
   }
 
   public createProduct(product: Product): Observable<Product> {
     this.loaderService.showLoader();
-    return this.http
-      .post<Product>(environment.apiUrl, product, {
-        headers: { Authorization: `Bearer ${this.authService.token()}` },
-      })
-      .pipe(
-        delay(1000),
-        tap(() =>
-          this.toasterService.showSuccess('Product created successfully')
-        ),
-        finalize(() => this.loaderService.hideLoader()),
-        catchError(this.handleError.bind(this))
-      );
+    return this.http.post<Product>(environment.apiUrl, product).pipe(
+      delay(500),
+      tap(() =>
+        this.toasterService.showSuccess('Product created successfully')
+      ),
+      finalize(() => this.loaderService.hideLoader()),
+      catchError(this.handleError.bind(this))
+    );
   }
 
   public updateProduct(
@@ -59,35 +49,27 @@ export class ApiService {
   ): Observable<Product> {
     const url = `${environment.apiUrl}/${id}`;
     this.loaderService.showLoader();
-    return this.http
-      .patch<Product>(url, updatedFields, {
-        headers: { Authorization: `Bearer ${this.authService.token()}` },
-      })
-      .pipe(
-        delay(1000),
-        tap(() =>
-          this.toasterService.showSuccess('Product updated successfully')
-        ),
-        finalize(() => this.loaderService.hideLoader()),
-        catchError(this.handleError.bind(this))
-      );
+    return this.http.patch<Product>(url, updatedFields).pipe(
+      delay(500),
+      tap(() =>
+        this.toasterService.showSuccess('Product updated successfully')
+      ),
+      finalize(() => this.loaderService.hideLoader()),
+      catchError(this.handleError.bind(this))
+    );
   }
 
   public deleteProduct(id: number): Observable<void> {
     const url = `${environment.apiUrl}/${id}`;
     this.loaderService.showLoader();
-    return this.http
-      .delete<void>(url, {
-        headers: { Authorization: `Bearer ${this.authService.token()}` },
-      })
-      .pipe(
-        delay(1000),
-        tap(() =>
-          this.toasterService.showSuccess('Product deleted successfully')
-        ),
-        finalize(() => this.loaderService.hideLoader()),
-        catchError(this.handleError.bind(this))
-      );
+    return this.http.delete<void>(url).pipe(
+      delay(500),
+      tap(() =>
+        this.toasterService.showSuccess('Product deleted successfully')
+      ),
+      finalize(() => this.loaderService.hideLoader()),
+      catchError(this.handleError.bind(this))
+    );
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {

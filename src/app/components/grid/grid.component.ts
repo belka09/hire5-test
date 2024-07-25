@@ -1,6 +1,8 @@
-import { Component, computed, Signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, computed, Signal } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { ApiService } from './../../services/api.service';
 import { Product } from '../../interfaces/product';
@@ -10,15 +12,27 @@ import { Product } from '../../interfaces/product';
   standalone: true,
   imports: [HttpClientModule],
   templateUrl: './grid.component.html',
-  styleUrl: './grid.component.scss',
+  styleUrls: ['./grid.component.scss'],
 })
-export class GridComponent {
+export class GridComponent implements OnInit, OnDestroy {
+  private readonly destroy$ = new Subject<void>();
+
   products: Signal<Product[]> = computed(() => this.apiService.products());
 
   constructor(private apiService: ApiService, private router: Router) {}
 
   ngOnInit(): void {
-    this.apiService.getProducts();
+    this.apiService
+      .getProducts()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((products) => {
+        this.apiService.products.set(products);
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   createNewProduct(): void {
@@ -31,9 +45,12 @@ export class GridComponent {
 
   deleteProduct(event: Event, id: number): void {
     event.stopPropagation();
-    this.apiService.deleteProduct(id).subscribe(() => {
-      const filteredProducts = this.products().filter((p) => p.id !== id);
-      this.apiService.products.set(filteredProducts);
-    });
+    this.apiService
+      .deleteProduct(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        const filteredProducts = this.products().filter((p) => p.id !== id);
+        this.apiService.products.set(filteredProducts);
+      });
   }
 }
