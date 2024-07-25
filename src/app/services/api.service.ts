@@ -1,68 +1,97 @@
 import { Injectable, signal, WritableSignal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, tap, finalize, delay } from 'rxjs/operators';
 import { ToasterService } from './toaster.service';
+import { LoaderService } from './loader.service';
+import { AuthService } from './auth.service';
 import { Product } from '../interfaces/product';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
-  private apiUrl = 'http://rest-items.research.cloudonix.io/items';
-
-  token: WritableSignal<string> = signal('');
-
-  products: WritableSignal<Product[]> = signal([]);
+  public products: WritableSignal<Product[]> = signal([]);
 
   constructor(
     private http: HttpClient,
-    private toasterService: ToasterService
+    private toasterService: ToasterService,
+    private loaderService: LoaderService,
+    private authService: AuthService
   ) {}
 
-  getProducts(): void {
+  public getProducts(): void {
+    this.loaderService.showLoader();
     this.http
-      .get<Product[]>(this.apiUrl)
-      .pipe(catchError(this.handleError.bind(this)))
+      .get<Product[]>(environment.apiUrl, {
+        headers: { Authorization: `Bearer ${this.authService.token()}` },
+      })
+      .pipe(
+        delay(1000),
+        finalize(() => this.loaderService.hideLoader()),
+        catchError(this.handleError.bind(this))
+      )
       .subscribe((items) => {
         this.products.set(items);
       });
   }
 
-  createProduct(product: Product): Observable<Product> {
-    return this.http.post<Product>(this.apiUrl, product).pipe(
-      tap(() =>
-        this.toasterService.showSuccess('Product created successfully')
-      ),
-      catchError(this.handleError.bind(this))
-    );
+  public createProduct(product: Product): Observable<Product> {
+    this.loaderService.showLoader();
+    return this.http
+      .post<Product>(environment.apiUrl, product, {
+        headers: { Authorization: `Bearer ${this.authService.token()}` },
+      })
+      .pipe(
+        delay(1000),
+        tap(() =>
+          this.toasterService.showSuccess('Product created successfully')
+        ),
+        finalize(() => this.loaderService.hideLoader()),
+        catchError(this.handleError.bind(this))
+      );
   }
 
-  updateProduct(
+  public updateProduct(
     id: number,
     updatedFields: Partial<Product>
   ): Observable<Product> {
-    const url = `${this.apiUrl}/${id}`;
-    return this.http.patch<Product>(url, updatedFields).pipe(
-      tap(() =>
-        this.toasterService.showSuccess('Product updated successfully')
-      ),
-      catchError(this.handleError.bind(this))
-    );
+    const url = `${environment.apiUrl}/${id}`;
+    this.loaderService.showLoader();
+    return this.http
+      .patch<Product>(url, updatedFields, {
+        headers: { Authorization: `Bearer ${this.authService.token()}` },
+      })
+      .pipe(
+        delay(1000),
+        tap(() =>
+          this.toasterService.showSuccess('Product updated successfully')
+        ),
+        finalize(() => this.loaderService.hideLoader()),
+        catchError(this.handleError.bind(this))
+      );
   }
 
-  deleteProduct(id: number): Observable<void> {
-    const url = `${this.apiUrl}/${id}`;
-    return this.http.delete<void>(url).pipe(
-      tap(() =>
-        this.toasterService.showSuccess('Product deleted successfully')
-      ),
-      catchError(this.handleError.bind(this))
-    );
+  public deleteProduct(id: number): Observable<void> {
+    const url = `${environment.apiUrl}/${id}`;
+    this.loaderService.showLoader();
+    return this.http
+      .delete<void>(url, {
+        headers: { Authorization: `Bearer ${this.authService.token()}` },
+      })
+      .pipe(
+        delay(1000),
+        tap(() =>
+          this.toasterService.showSuccess('Product deleted successfully')
+        ),
+        finalize(() => this.loaderService.hideLoader()),
+        catchError(this.handleError.bind(this))
+      );
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {
-    console.error(`An error occurred: ${error.message}`);
+    this.loaderService.hideLoader();
     this.toasterService.showError(
       'Something bad happened; please try again later.'
     );

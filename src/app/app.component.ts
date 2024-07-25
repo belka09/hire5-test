@@ -1,22 +1,23 @@
-import { Component, effect } from '@angular/core';
+import { Component, computed, effect, Signal } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
-import { ApiService } from './services/api.service';
+import { AuthService } from './services/auth.service';
 import { ToasterComponent } from './components/toaster/toaster.component';
+import { HeaderComponent } from './components/header/header.component';
+import { LoaderComponent } from './components/loader/loader.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, ToasterComponent],
+  imports: [HeaderComponent, RouterOutlet, ToasterComponent, LoaderComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss',
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  title = 'hire5-test-app';
+  public token: Signal<string> = computed(() => this.authService.token());
 
-  constructor(private apiServie: ApiService, private router: Router) {
+  constructor(private authService: AuthService, private router: Router) {
     effect(() => {
-      const token = this.apiServie.token();
-      if (!token) {
+      if (!this.token()) {
         this.router.navigate(['login']);
       }
     });

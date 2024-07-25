@@ -7,21 +7,21 @@ import {
   Validators,
 } from '@angular/forms';
 
-import { ApiService } from '../../services/api.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [ReactiveFormsModule],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss',
+  styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit {
   public loginForm!: FormGroup;
 
   constructor(
     private fb: FormBuilder,
-    private apiService: ApiService,
+    private authService: AuthService,
     private router: Router
   ) {}
 
@@ -33,7 +33,8 @@ export class LoginComponent implements OnInit {
 
   onSubmit() {
     if (this.loginForm.valid) {
-      this.apiService.token.set(this.loginForm.value.authKey);
+      const authKey = this.loginForm.value.authKey;
+      this.authService.setToken(authKey);
       this.router.navigateByUrl('/products');
     }
   }

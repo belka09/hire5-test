@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ToasterService, ToastMessage } from '../../services/toaster.service';
+import { ToasterService } from '../../services/toaster.service';
+import { Toast } from '../../interfaces/toast';
 
 @Component({
   selector: 'app-toaster',
@@ -19,18 +20,18 @@ import { ToasterService, ToastMessage } from '../../services/toaster.service';
   `,
 })
 export class ToasterComponent implements OnInit {
-  toasts: ToastMessage[] = [];
+  toasts: Toast[] = [];
 
   constructor(private toasterService: ToasterService) {}
 
   ngOnInit() {
-    this.toasterService.toastState.subscribe((toast: ToastMessage) => {
+    this.toasterService.toastState.subscribe((toast: Toast) => {
       this.toasts.push(toast);
       setTimeout(() => this.toasts.shift(), 3000);
     });
   }
 
-  trackByFn(index: number, item: ToastMessage): number {
+  trackByFn(index: number, item: Toast): number {
     return index;
   }
 }
