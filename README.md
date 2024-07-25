@@ -12,10 +12,10 @@ Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The appli
 # select a repo from github or gitlab
 
 # download the example or clone the repo from github
-git clone https://github.com/ganatan/angular-app.git
+git clone https://github.com/belka09/hire5-test.git
 
 # download the example or clone the repo from gitlab
-git clone https://gitlab.com/ganatan/angular-app.git
+git clone https://github.com/belka09/hire5-test.git
 
 # change directory
 cd angular-app
