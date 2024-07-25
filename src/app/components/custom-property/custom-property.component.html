@@ -1,0 +1,24 @@
+<div [formGroup]="formGroup">
+    <div formArrayName="properties">
+        <div *ngFor="let property of propertiesArray.controls; let i = index"
+            [formGroupName]="i"
+            class="mb-2 flex w-full items-center">
+            <label for="key-{{i}}">Key:</label>
+            <input id="key-{{i}}"
+                formControlName="key"
+                class="border p-2 rounded mx-2" />
+
+            <label for="value-{{i}}">Value:</label>
+            <input id="value-{{i}}"
+                formControlName="value"
+                class="border p-2 rounded mx-2" />
+
+            <button type="button"
+                (click)="removeProperty(i)"
+                class="bg-red-500 text-white p-2 rounded">Delete</button>
+        </div>
+    </div>
+    <button type="button"
+        (click)="addProperty()"
+        class="bg-green-500 text-white p-2 rounded">Add Property</button>
+</div>

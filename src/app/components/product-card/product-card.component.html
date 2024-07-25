@@ -65,6 +65,11 @@
                     type="number"
                     class="border p-2 rounded w-full" />
             </div>
+
+            <app-custom-property-editor [properties]="productForm.get('profile.customProperties')?.value"
+                (propertiesChange)="onCustomPropertiesChange($event)">
+            </app-custom-property-editor>
+
         </div>
     </form>
 </div>

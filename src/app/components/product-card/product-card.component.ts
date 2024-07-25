@@ -87,6 +87,7 @@ export class ProductCardComponent implements OnInit, OnDestroy {
         type: [profile.type || 'furniture'],
         available: [profile.available ?? true],
         backlog: [profile.backlog || ''],
+        customProperties: [profile.customProperties || {}],
       }),
     });
 
@@ -149,6 +150,18 @@ export class ProductCardComponent implements OnInit, OnDestroy {
   onProfileChange(): void {
     const profile = this.productForm.get('profile')!.value;
     this.productForm.patchValue({ profile }, { emitEvent: false });
+  }
+
+  onCustomPropertiesChange(customProperties: { [key: string]: string }): void {
+    this.productForm.patchValue(
+      {
+        profile: {
+          ...this.productForm.get('profile')!.value,
+          customProperties,
+        },
+      },
+      { emitEvent: false }
+    );
   }
 
   onSubmit(): void {
