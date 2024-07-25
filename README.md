@@ -6,6 +6,48 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
 
+## Quick start
+
+```bash
+# select a repo from github or gitlab
+
+# download the example or clone the repo from github
+git clone https://github.com/ganatan/angular-app.git
+
+# download the example or clone the repo from gitlab
+git clone https://gitlab.com/ganatan/angular-app.git
+
+# change directory
+cd angular-app
+cd application-angular
+
+# install the repo with npm
+npm install
+
+# start the server
+npm start
+
+```
+in your browser go to [http://localhost:4200](http://localhost:4200) 
+
+
+## Front-end
+
+### Installation
+* `npm install` (installing dependencies)
+* `npm outdated` (verifying dependencies)
+
+### Developpement
+* `npm run start`
+* in your browser [http://localhost:4200](http://localhost:4200) 
+
+## Linter
+* `npm run lint`
+
+## Tests
+* `npm run test`
+* `npm run coverage`
+
 ## Code scaffolding
 
 Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
